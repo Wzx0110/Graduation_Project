@@ -3,8 +3,8 @@ import requests
 import torch
 from PIL import Image
 from transformers import AutoProcessor, AutoModelForCausalLM 
-image = "london.jpg"
-image = Image.open(image).convert("RGB")
+# image = "london.jpg"
+# image = Image.open(image).convert("RGB")
 def getimg2text(image):
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
     torch_dtype = torch.float16 if torch.cuda.is_available() else torch.float32

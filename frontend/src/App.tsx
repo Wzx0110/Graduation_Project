@@ -32,7 +32,7 @@ function App() {
     formData.append("image2", files[1]); // 添加第二張圖片
 
     try {
-      const response = await fetch("https://your-backend-endpoint/process-images", {
+      const response = await fetch("http://localhost:8000/interpolated/", {
         method: "POST",
         body: formData,
       });
@@ -41,10 +41,11 @@ function App() {
         throw new Error("圖片處理失敗");
       }
 
-      const data = await response.json(); // 解析後端返回的 JSON 數據
+      const blob = await response.blob(); // 解析後端返回的 JSON 數據
+      const imageUrl = URL.createObjectURL(blob); // 創建圖片 URL
       setResult({
-        image: data.imageUrl, // 使用後端返回的圖片 URL
-        text: data.text,     // 使用後端返回的文字
+        image: imageUrl, // 使用後端返回的圖片 URL
+        text: "完成處理",     // 使用後端返回的文字
       });
     } catch (error) {
       console.error("上傳錯誤", error);
