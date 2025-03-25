@@ -1,19 +1,25 @@
 from fastapi import FastAPI, File, UploadFile
-from backend.src.im2text import getimg2text
+from im2text import getimg2text
 from PIL import Image
 import torch
 from fastapi.middleware.cors import CORSMiddleware  # 導入 CORS 中間件
-from ollamaConect import getResponse
+from ollamaConnect import getResponse
 import io
 from fastapi.responses import JSONResponse
-app = FastAPI()# FastAPI 物件
-# 添加 CORS 中間件
+from interpolated import getImgInterpolated
+from fastapi.responses import StreamingResponse
+app = FastAPI()
+oringin = [
+    "*"
+    # 如果有前端，可以添加前端的地址           ]
+]
+# 添加 CORS 中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 允許所有來源，或者指定具體的來源（例如 ["http://localhost:8000"]）
+    allow_origins=oringin,
     allow_credentials=True,
-    allow_methods=["*"],  # 允許所有 HTTP 方法
-    allow_headers=["*"],  # 允許所有 HTTP 頭
+    allow_methods=["*"],  # 允许所有 HTTP 方法
+    allow_headers=["*"],  # 允许所有 HTTP 头
 )
 @app.post("/upload/")# 裝飾器
 async def upload_image(file: UploadFile = File(...)):  # 接收前端上傳的圖片
@@ -26,6 +32,21 @@ async def upload_image(file: UploadFile = File(...)):  # 接收前端上傳的�
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
+    
+@app.post("/interpolated/")
+async def interpolated(image1: UploadFile = File(...), image2: UploadFile = File(...)):
+    try:
+        image_data1 = await image1.read()
+        image_data2 = await image2.read()
+        oldImage = Image.open(io.BytesIO(image_data1)).convert("RGB")
+        newImage = Image.open(io.BytesIO(image_data2)).convert("RGB")
+        response = getImgInterpolated(oldImage, newImage)
+        return StreamingResponse(response, media_type="image/jpeg")  # 直接回傳圖片
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=400)
+    
+    # uvicorn main:app --reload
 '''
 def index():
     image = "london.jpg"
@@ -33,5 +54,4 @@ def index():
     text = getimg2text(image)# 取得圖片描述
     return getResponse(text)# 回傳字典
 我希望從前端獲取image
-uvicorn main:app --reload
 '''
