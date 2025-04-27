@@ -210,7 +210,7 @@ if __name__ == '__main__':
     start_time = time.time()
     initialize_sd_pipeline()
     img1 = Image.open("1.png").convert("RGB").resize((512, 512), Image.LANCZOS)
-    img2 = Image.open("1.png").convert("RGB").resize((512, 512), Image.LANCZOS)
+    img2 = Image.open("2.png").convert("RGB").resize((512, 512), Image.LANCZOS)
 
     steps_list = [
         {"step": 1, "title": "Tarp Reconfiguration", "description": "The large blue tarp covering the entire wall of the building begins to shrink, retracting upwards as if being rolled up. The scaffolding holding it in place gradually lifts and retracts along with the tarp, revealing the underlying structure of the wall beneath. This process reveals portions of a white facade, matching the color seen on the finished apartment building."},
