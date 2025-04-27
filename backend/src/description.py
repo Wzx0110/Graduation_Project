@@ -4,7 +4,7 @@ from PIL import Image
 import time
 from typing import Optional
 
-# --- 用於模型和處理器的全域變數 ---
+# 用於模型和處理器的全域變數
 IMG_DESC_MODEL = None
 IMG_DESC_PROCESSOR = None
 IMG_DESC_MODEL_ID = 'microsoft/Florence-2-large'
