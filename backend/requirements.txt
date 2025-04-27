@@ -3,3 +3,13 @@ torch
 transformers
 Pillow
 ollama
+fastapi
+uvicorn[standard]
+python-multipart  # For FastAPI File uploads
+opencv-python
+numpy
+Pillow
+transformers
+torch
+diffusers[torch] # Includes accelerate
+ollama
