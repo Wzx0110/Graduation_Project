@@ -19,7 +19,7 @@ GENERATION_TARGET_SIZE = (512, 512)  # 生成圖像的目標尺寸，建議符�
 GENERATION_STRENGTH = 0.40          # Img2Img 強度 (0.0 到 1.0，較低值表示允許更多變化)
 GENERATION_GUIDANCE_SCALE = 8.0     # CFG 引導比例 (Classifier-Free Guidance)
 GENERATION_NUM_INFERENCE_STEPS = 30  # Stable Diffusion 的去噪步數 (較少步數可加速生成)
-GENERATION_NEGATIVE_PROMPT = "blurry, low quality, deformed, distorted, unrealistic, bad anatomy, disfigured, text, words, letters, signature, watermark"  # 負面提示詞，避免生成特定內容
+GENERATION_NEGATIVE_PROMPT = "blurry, low quality, deformed, distorted, unrealistic, bad anatomy, disfigured"  # 負面提示詞，避免生成特定內容
 
 NUM_INTERPOLATION_FRAMES = 10
 
