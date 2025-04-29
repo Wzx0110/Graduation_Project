@@ -116,30 +116,30 @@ def generate_transition_prompts(text1: str, text2: str, num_steps: int = 10, mod
         如果生成或解析失敗則回傳 None
     """
 
-    question = f"""
-Given two image descriptions:
+    question = f"""Create a 10-step gradual transformation between these two scenes WITH A COHERENT STORYLINE in order to let stable diffusion generate a picture of the transformation.:
 
-First image: {text1}  
-Second image: {text2}  
+Scene 1: {text1}
+Scene 2: {text2}
 
-Describe a **gradual, step-by-step transformation of the entire scene** from the first image to the second image.  
+Requirements:
+1. Each step must include:
+   - Time progression (e.g., "Day 3", "Week 2")
+   - Visual changes to the ENTIRE scene
+   - Character actions/events
+   - Environmental atmosphere
+2. Format each step as a SINGLE narrative description combining all elements
+3. Include at least 2 recurring characters, with roles and actions in each step, don't use names
+4. Maintain logical progression between steps
 
-- Each step should describe **the whole image**, not just specific objects or parts.  
-- The transition should be **smooth and visually realistic**, ensuring that each step logically follows the previous one.  
-- Focus only on **visible changes** in the image, avoiding construction techniques or non-visual details.  
-- Provide **{num_steps} sequential steps**, each showing the full scene at that moment.  
-
-
-
-IMPORTANT: Please output the response as a **valid JSON list** with the following structure:
+Output STRICTLY as JSON format:
 [
-    {{"step": 1, "title": "Step Title", "description": "Detailed explanation of the step."}},
-    {{"step": 2, "title": "Step Title", "description": "Detailed explanation of the step."}},
-    ...
-]
-
-DO NOT include extra text outside of this JSON format.
-"""
+    {{
+        "step": 1,
+        "title": "Time indicator",
+        "description": "Combined narrative containing visual changes, character actions, and atmosphere. Minimum 2 sentences."
+    }},
+    ... # 10 items
+]"""
 
     answer = ask_ollama(model_name, question)  # 呼叫 ask_ollama 獲取回應
 
