@@ -142,7 +142,7 @@ def align_images(img1_bytes: bytes, img2_bytes: bytes):
                 cv2.imwrite(os.path.join(
                     OUTPUT_DIR, "blended_result.png"), blended_image)
 
-                return aligned_img1
+                return aligned_img1, img2_color
             else:
                 # 如果內點不足
                 print(f"內點數量不足 ({inlier_count}/{MIN_INLIER_COUNT})。對齊效果可能不佳")
@@ -153,7 +153,7 @@ def align_images(img1_bytes: bytes, img2_bytes: bytes):
                 cv2.imwrite(os.path.join(
                     OUTPUT_DIR, "aligned_image1_low_inliers.png"), aligned_img1)
 
-                return aligned_img1
+                return aligned_img1, img2_color
 
         else:
             # 良好匹配點不足以估計 Homography
@@ -162,6 +162,53 @@ def align_images(img1_bytes: bytes, img2_bytes: bytes):
             return None
     except Exception as e:
         print(f"對齊過程中發生錯誤：{e}")
+
+
+def crop_images(img1_aligned: np.ndarray, img2_ref: np.ndarray):
+    """
+    裁剪兩張圖片，去除 img1_aligned 因 warpPerspective 產生的黑色邊框
+    裁剪區域是 img1_aligned 中最大不含黑色像素的矩形區域
+
+    Args:
+        img1_aligned: 經過 warpPerspective 變換後的圖片 
+        img2_ref: 原始的參考圖片。
+
+    Returns:
+        tuple[np.ndarray | None, np.ndarray | None]:
+            - (裁剪後的 aligned 圖片, 裁剪後的 ref 圖片)
+    """
+
+    # 找到非黑色像素區域
+    gray_aligned = cv2.cvtColor(img1_aligned, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(gray_aligned, 0, 255, cv2.THRESH_BINARY)
+
+    cv2.imwrite(os.path.join(OUTPUT_DIR, "crop_mask.png"), mask)
+
+    # mask 中最大的輪廓
+    contours, _ = cv2.findContours(
+        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    # 尋找面積最大的輪廓
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    x, y, w, h = cv2.boundingRect(largest_contour)
+    print(f"找到的有效裁剪區域: x={x}, y={y}, w={w}, h={h}")
+
+    # 檢查邊界框是否有效 (寬度和高度必須大於 0)
+    if w <= 0 or h <= 0:
+        print(f"邊界框無效 (寬={w}, 高={h})，無法進行裁剪。")
+        return None, None
+
+    # 裁剪兩張圖片
+    cropped_aligned = img1_aligned[y:y+h, x:x+w]
+    # 確保裁剪區域不超出參考圖像的邊界
+    ref_h, ref_w = img2_ref.shape[:2]
+    crop_y_end = min(y + h, ref_h)
+    crop_x_end = min(x + w, ref_w)
+    cropped_ref = img2_ref[y:crop_y_end, x:crop_x_end]
+
+    print(f"圖像尺寸: {cropped_aligned.shape}")
+    return cropped_aligned, cropped_ref
 
 
 # 測試
@@ -183,22 +230,33 @@ if __name__ == "__main__":
         print(f"讀取測試圖片時發生錯誤：{e}")
         exit()
 
-    aligned_image_np = align_images(
+    aligned_image_np, ref_image_np = align_images(
         img1_bytes,
         img2_bytes
     )
 
-    if aligned_image_np is not None:
-        print(f"對齊後圖片的形狀：{aligned_image_np.shape}，類型：{aligned_image_np.dtype}")
+    print(f"對齊後圖片的形狀：{aligned_image_np.shape}，類型：{aligned_image_np.dtype}")
+    cv2.imwrite(os.path.join(
+        OUTPUT_DIR, "final_aligned_test_output.png"), aligned_image_np)
 
-        try:
-            cv2.imwrite(os.path.join(
-                OUTPUT_DIR, "final_aligned_test_output.png"), aligned_image_np)
-
-        except Exception as e:
-            print(f"儲存最終對齊結果時發生錯誤：{e}")
+    if aligned_image_np is None or ref_image_np is None:
+        print("無法進行裁剪。")
     else:
-        print("對齊失敗")
+        cropped_aligned, cropped_ref = crop_images(
+            aligned_image_np, ref_image_np)
+
+        if cropped_aligned is not None and cropped_ref is not None:
+            cv2.imwrite(os.path.join(
+                OUTPUT_DIR, "cropped_aligned.png"), cropped_aligned)
+            cv2.imwrite(os.path.join(
+                OUTPUT_DIR, "cropped_ref.png"), cropped_ref)
+
+            blended_cropped = cv2.addWeighted(
+                cropped_ref, 0.5, cropped_aligned, 0.5, 0.0)
+            cv2.imwrite(os.path.join(
+                OUTPUT_DIR, "blended_cropped.png"), blended_cropped)
+        else:
+            print("圖像裁剪失敗。")
 
     end_time = time.time()
     execution_time = end_time - start_time
