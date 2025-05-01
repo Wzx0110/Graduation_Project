@@ -9,6 +9,7 @@ from alignment import align_images, crop_images
 from description import initialize_image_description_model, generate_image_description
 from prompting import generate_transition_prompts
 from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
+from video import create_video_file
 
 
 INPUT_IMG1_PATH = "1.png"
@@ -21,7 +22,7 @@ GENERATION_GUIDANCE_SCALE = 12     # CFG 引導比例 (Classifier-Free Guidance)
 GENERATION_NUM_INFERENCE_STEPS = 100  # Stable Diffusion 的去噪步數 (較少步數可加速生成)
 GENERATION_NEGATIVE_PROMPT = "blurry, low quality, deformed, distorted, unreal, unscale, words"  # 負面提示詞，避免生成特定內容
 
-NUM_INTERPOLATION_FRAMES = 10
+NUM_INTERPOLATION_FRAMES = 100
 
 # --- 裝置設定 (Device Setting) ---
 # 自動偵測是否有可用的 CUDA GPU，否則使用 CPU
@@ -207,5 +208,6 @@ if __name__ == "__main__":
     )
     print(f"內插後共得到 {len(final_frames_pil)} 個最終影格。")
 
+    create_video_file(final_frames_pil, 20)
     main_end_time = time.time()
     print(f"總執行時間: {main_end_time - main_start_time:.2f} 秒。")
