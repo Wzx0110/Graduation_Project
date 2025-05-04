@@ -37,17 +37,12 @@ def create_video_file(image_list: List[Image.Image], fps: int = 15) -> bool:
         print(f"影片尺寸：{width}x{height}")
 
         # 定義編解碼器並創建 VideoWriter 物件，直接寫入目標檔案
-        fourcc = cv2.VideoWriter_fourcc(*'avc1')  # H.264
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
         out_video = cv2.VideoWriter(
             output_path, fourcc, float(fps), (width, height))
-
         if not out_video.isOpened():
-            fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-            out_video = cv2.VideoWriter(
-                output_path, fourcc, float(fps), (width, height))
-            if not out_video.isOpened():
-                print(f"編解碼器 'mp4v' 失敗。無法創建影片檔案 {output_path}。")
-                return False
+            print(f"編解碼器 'mp4v' 失敗。無法創建影片檔案 {output_path}。")
+            return False
 
         # 逐一寫入影格
         for i, img in enumerate(image_list):

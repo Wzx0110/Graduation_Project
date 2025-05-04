@@ -1,32 +1,36 @@
 import React from 'react';
 
-// 定義 ResultDisplay 的 Props 介面
 interface ResultDisplayProps {
     result: {
-        image?: string; // 處理後的圖片 URL
-        text: string;  // 處理後的文字結果
+        outputUrl?: string;
+        text: string;
+        status: 'idle' | 'processing' | 'success' | 'error';
     };
+    isProcessing: boolean;
 }
 
-const ResultDisplay: React.FC<ResultDisplayProps> = ({ result }) => {
+const ResultDisplay: React.FC<ResultDisplayProps> = ({ result, isProcessing }) => {
     return (
-        <div className="w-full space-y-4">
-            {/* 圖片顯示區域 */}
-            <div className="w-full h-64 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
-                {result.image ? (
-                    <img
-                        src={result.image}
-                        alt="處理結果"
-                        className="max-w-full max-h-full object-contain"
-                    />
+        // 保持 w-full 使其填滿容器寬度
+        <div className="w-full h-full flex items-center justify-center">
+            {/* 影片顯示區域 */}
+            <div className="w-full h-full flex items-center justify-center">
+                {result.outputUrl ? (
+                    <video
+                        src={result.outputUrl}
+                        controls // 加入播放控制條
+                        loop // 影片循環播放
+                        autoPlay // 自動播放
+                        playsInline // 在移動裝置上行內播放
+                        className="max-w-full max-h-full object-contain" // 保持影片在容器內且維持比例
+                    >
+                        您的瀏覽器不支援 Video 標籤。
+                    </video>
                 ) : (
-                    <div className="text-gray-500">等待處理結果...</div>
+                    <div className="text-gray-400 italic px-4 text-center">
+                        {isProcessing ? '影片生成中...' : (result.status === 'error' ? '' : '等待生成影片...')}
+                    </div>
                 )}
-            </div>
-
-            {/* 文字顯示區域 */}
-            <div className="w-full min-h-[100px] border border-gray-300 rounded-lg p-4 bg-white">
-                {result.text || '等待處理結果...'}
             </div>
         </div>
     );
