@@ -154,7 +154,7 @@ if __name__ == "__main__":
         text2=desc2,
         num_steps=10,
     )
-    prompt_end_time = time.time()  #
+    prompt_end_time = time.time()
 
     if not transition_steps_list:
         print("生成過渡提示詞失敗")

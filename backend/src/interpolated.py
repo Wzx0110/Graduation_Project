@@ -5,6 +5,7 @@ import numpy as np
 from diffusers import StableDiffusionPipeline
 from io import BytesIO
 
+
 def getImgInterpolated(oldImage, newImage):
     # 將 PIL 圖片轉換為 numpy 數組
     image1 = np.array(oldImage)
@@ -17,14 +18,16 @@ def getImgInterpolated(oldImage, newImage):
     # 將圖像轉換為 PyTorch 張量並歸一化
     def preprocess_image(image):
         image = image.astype(np.float32) / 255.0
-        image = torch.tensor(image).permute(2, 0, 1).unsqueeze(0)  # 調整維度並添加批次維度
+        image = torch.tensor(image).permute(
+            2, 0, 1).unsqueeze(0)  # 調整維度並添加批次維度
         return image
 
     image1_tensor = preprocess_image(image1).to("cuda", torch.float16)
     image2_tensor = preprocess_image(image2).to("cuda", torch.float16)
 
     # 加載預訓練模型
-    pipe = StableDiffusionPipeline.from_pretrained("runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
+    pipe = StableDiffusionPipeline.from_pretrained(
+        "runwayml/stable-diffusion-v1-5", torch_dtype=torch.float16)
     pipe = pipe.to("cuda")
 
     with torch.no_grad():
@@ -50,8 +53,10 @@ def getImgInterpolated(oldImage, newImage):
     def convert(interpolated_latent):
         with torch.no_grad():
             interpolated_image = pipe.vae.decode(interpolated_latent).sample
-            interpolated_image = (interpolated_image / 2 + 0.5).clamp(0, 1)  # 歸一化到 [0, 1]
-            interpolated_image = interpolated_image.squeeze(0).permute(1, 2, 0).cpu().numpy()
+            interpolated_image = (interpolated_image /
+                                  2 + 0.5).clamp(0, 1)  # 歸一化到 [0, 1]
+            interpolated_image = interpolated_image.squeeze(
+                0).permute(1, 2, 0).cpu().numpy()
             interpolated_image = (interpolated_image * 255).astype("uint8")
         return interpolated_image
 
