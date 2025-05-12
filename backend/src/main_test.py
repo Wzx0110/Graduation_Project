@@ -9,9 +9,7 @@ from alignment import align_images, crop_images
 from description import initialize_image_description_model, generate_image_description
 from prompting import generate_transition_prompts
 from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
-from video import create_video_file
-
-
+from backend.src.sub_audio import create_sub_video_file
 INPUT_IMG1_PATH = "1.png"
 INPUT_IMG2_PATH = "2.png"
 
@@ -207,7 +205,6 @@ if __name__ == "__main__":
         num_interpolations=NUM_INTERPOLATION_FRAMES
     )
     print(f"內插後共得到 {len(final_frames_pil)} 個最終影格。")
-
-    create_video_file(final_frames_pil, 20)
+    create_video_file(final_frames_pil, 20, transition_steps_list)
     main_end_time = time.time()
     print(f"總執行時間: {main_end_time - main_start_time:.2f} 秒。")

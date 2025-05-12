@@ -8,6 +8,8 @@ import io
 from fastapi.responses import JSONResponse
 from interpolated import getImgInterpolated
 from fastapi.responses import StreamingResponse
+from v1_test import transtion
+
 app = FastAPI()
 oringin = [
     "*"
@@ -45,8 +47,26 @@ async def interpolated(image1: UploadFile = File(...), image2: UploadFile = File
 
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=400)
+
+@app.post("/Process/")
+async def Process(image1: UploadFile = File(...), image2: UploadFile = File(...)):
+    try:
+        image_data1 = await image1.read()
+        image_data2 = await image2.read()
+        oldImage = Image.open(io.BytesIO(image_data1)).convert("RGB")
+        newImage = Image.open(io.BytesIO(image_data2)).convert("RGB")
+
+        video_io = await transtion(oldImage, newImage)
+
+        return StreamingResponse(video_io, media_type="video/mp4", headers={
+            "Content-Disposition": "attachment; filename=transition.mp4"
+        })
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=400)
     
-    # uvicorn main:app --reload
+
+# uvicorn main:app --reload
 '''
 def index():
     image = "london.jpg"

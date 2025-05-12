@@ -44,7 +44,7 @@ function App() {
     formData.append("prompt", optionalPrompt);
 
     try {
-      const response = await fetch("http://localhost:8000/interpolated/", {
+      const response = await fetch("http://localhost:8000/Process", {
         method: "POST",
         body: formData,
       });
