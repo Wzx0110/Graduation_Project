@@ -6,7 +6,7 @@ import time
 import os  # 用於處理文件路徑和目錄
 
 
-OUTPUT_DIR = "../../assets/video"  # 輸出資料夾
+OUTPUT_DIR = "../../../assets/video"  # 輸出資料夾
 
 
 def create_video_file(image_list: List[Image.Image], fps: int = 15) -> bool:

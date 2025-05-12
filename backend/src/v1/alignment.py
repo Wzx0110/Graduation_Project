@@ -4,7 +4,7 @@ import time
 import os
 
 # 參數設定
-OUTPUT_DIR = "../../assets/image_alignment"  # 輸出資料夾
+OUTPUT_DIR = "../../../assets/image_alignment"  # 輸出資料夾
 RATIO_THRESHOLD = 0.6                  # Lowe 比率測試的閾值
 MIN_GOOD_MATCH_COUNT = 10              # 至少需要多少個良好匹配點才能估計 Homography
 RANSAC_REPROJ_THRESHOLD = 1.0          # MAGSAC++ 重投影誤差閾值 (像素)
