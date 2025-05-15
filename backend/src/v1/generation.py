@@ -11,7 +11,7 @@ import gc  # 垃圾回收模組
 SD_MODEL_ID = "stabilityai/stable-diffusion-2-1-base"
 VAE_ID = "stabilityai/sd-vae-ft-mse"
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-OUTPUT_DIR = "../../assets/keyframes"  # 輸出資料夾
+OUTPUT_DIR = "../../../assets/keyframes"  # 輸出資料夾
 
 # 全域變數保存 pipeline 和 VAE
 SD_PIPELINE = None
@@ -209,8 +209,10 @@ def interpolate_frames(key_frames: List[Image.Image], num_interpolations: int = 
 if __name__ == '__main__':
     start_time = time.time()
     initialize_sd_pipeline()
-    img1 = Image.open("1.png").convert("RGB").resize((512, 512), Image.LANCZOS)
-    img2 = Image.open("2.png").convert("RGB").resize((512, 512), Image.LANCZOS)
+    img1 = Image.open(
+        "../../../assets/test_images/1.png").convert("RGB").resize((512, 512), Image.LANCZOS)
+    img2 = Image.open(
+        "../../../assets/test_images/2.png").convert("RGB").resize((512, 512), Image.LANCZOS)
 
     steps_list = [
         {"step": 1, "title": "Tarp Reconfiguration", "description": "The large blue tarp covering the entire wall of the building begins to shrink, retracting upwards as if being rolled up. The scaffolding holding it in place gradually lifts and retracts along with the tarp, revealing the underlying structure of the wall beneath. This process reveals portions of a white facade, matching the color seen on the finished apartment building."},

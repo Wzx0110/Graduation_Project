@@ -214,8 +214,8 @@ def crop_images(img1_aligned: np.ndarray, img2_ref: np.ndarray):
 # 測試
 if __name__ == "__main__":
     start_time = time.time()
-    img1_path = "1.png"  # 要對齊的圖片
-    img2_path = "2.png"  # 參考圖片
+    img1_path = "../../../assets/test_images/1.png"  # 要對齊的圖片
+    img2_path = "../../../assets/test_images/2.png"  # 參考圖片
 
     print(f"測試圖片 1: {img1_path}")
     print(f"測試圖片 2: {img2_path}")

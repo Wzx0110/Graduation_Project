@@ -107,9 +107,9 @@ if __name__ == '__main__':
     start_time = time.time()
     initialize_image_description_model()
 
-    image_path = "1.png"
+    image_path = "../../../assets/test_images/1.png"
     img1 = Image.open(image_path).convert("RGB")
-    image_path = "2.png"
+    image_path = "../../../assets/test_images/2.png"
     img2 = Image.open(image_path).convert("RGB")
 
     detailed_description_1 = generate_image_description(

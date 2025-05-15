@@ -124,8 +124,8 @@ def cleanup_image_description_model():
 if __name__ == '__main__':
     start_time = time.time()
     initialize_image_description_model()
-    img1 = Image.open("1.png").convert("RGB")
-    img2 = Image.open("2.png").convert("RGB")
+    img1 = Image.open("../../../assets/test_images/1.png").convert("RGB")
+    img2 = Image.open("../../../assets/test_images/2.png").convert("RGB")
 
     detailed_description_1 = generate_image_description(
         img1, task_prompt='<MORE_DETAILED_CAPTION>')

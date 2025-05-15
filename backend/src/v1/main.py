@@ -12,8 +12,8 @@ from generation import initialize_sd_pipeline, generate_image_sequence, interpol
 from video import create_video_file
 
 
-INPUT_IMG1_PATH = "1.png"
-INPUT_IMG2_PATH = "2.png"
+INPUT_IMG1_PATH = "../../../assets/test_images/1.png"
+INPUT_IMG2_PATH = "../../../assets/test_images/2.png"
 
 # generation.py 的參數
 GENERATION_TARGET_SIZE = (512, 512)  # 生成圖像的目標尺寸，建議符合 SD 模型的原生尺寸
