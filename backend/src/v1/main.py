@@ -16,7 +16,7 @@ INPUT_IMG1_PATH = "../../../assets/test_images/1.png"
 INPUT_IMG2_PATH = "../../../assets/test_images/2.png"
 
 # generation.py 的參數
-GENERATION_TARGET_SIZE = (512, 512)  # 生成圖像的目標尺寸，建議符合 SD 模型的原生尺寸
+GENERATION_TARGET_SIZE = (1024, 1024)  # 生成圖像的目標尺寸，建議符合 SD 模型的原生尺寸
 GENERATION_STRENGTH = 0.3          # Img2Img 強度 (0.0 到 1.0，較低值表示允許更多變化)
 GENERATION_GUIDANCE_SCALE = 12     # CFG 引導比例 (Classifier-Free Guidance)
 GENERATION_NUM_INFERENCE_STEPS = 100  # Stable Diffusion 的去噪步數 (較少步數可加速生成)
