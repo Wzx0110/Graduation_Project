@@ -215,25 +215,41 @@ def crop_images(img1_aligned: np.ndarray, img2_ref: np.ndarray):
 
     print(f"裁剪後圖像尺寸: {cropped_aligned.shape}")
     return cropped_aligned, cropped_ref
-def shrink(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # 二值化：將非黑的地方視為內容
-    _, thresh = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)
 
-    # 找出非黑像素的最小邊界
-    coords = cv2.findNonZero(thresh)
-    x, y, w, h = cv2.boundingRect(coords)
+def shrink(image):
+    """
+    在 binary mask 中找出最大純白矩形 (只含 255)，回傳 (x, y, w, h)
+    """
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    cv2.imwrite("mask.png", mask)
+    # 找輪廓
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        raise ValueError("找不到白色區域")
 
-    # 多裁一點邊界（往內縮）
-    shrink = 20  # 可調整：裁掉更多請設更大
-    x_new = min(x + shrink, img.shape[1] - 1)
-    y_new = min(y + shrink, img.shape[0] - 1)
-    w_new = max(w - 2 * shrink, 1)
-    h_new = max(h - 2 * shrink, 1)
+    # 選最大輪廓（可能就是白底）
+    largest_contour = max(contours, key=cv2.contourArea)
 
-    # 裁剪圖片
-    cropped = img[y_new:y_new + h_new, x_new:x_new + w_new]
-    return cropped
+    # 近似成四邊形
+    epsilon = 0.02 * cv2.arcLength(largest_contour, True)
+    approx = cv2.approxPolyDP(largest_contour, epsilon, True)
+
+    if len(approx) != 4:
+        raise ValueError(f"偵測到的角點不是四個，而是 {len(approx)}")
+
+    # 排序四個角點為 top-left, top-right, bottom-right, bottom-left
+    points = approx.reshape(4, 2)
+    #print(f"偵測到的四個角點：{points}")
+    x = []
+    y = []
+    for i in range(4):
+        x.append(points[i][0])
+        y.append(points[i][1])
+    x = sorted(x)
+    y = sorted(y)
+    return image[y[1]:y[3], x[1]:x[3]]  # 裁剪區域
+
 
 
 # 測試
