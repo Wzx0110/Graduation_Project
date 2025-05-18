@@ -33,20 +33,7 @@ async def upload_image(file: UploadFile = File(...)):  # 接收前端上傳的�
         return JSONResponse(content=response)
 
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=400)
-    
-@app.post("/interpolated/")
-async def interpolated(image1: UploadFile = File(...), image2: UploadFile = File(...)):
-    try:
-        image_data1 = await image1.read()
-        image_data2 = await image2.read()
-        oldImage = Image.open(io.BytesIO(image_data1)).convert("RGB")
-        newImage = Image.open(io.BytesIO(image_data2)).convert("RGB")
-        response = getImgInterpolated(oldImage, newImage)
-        return StreamingResponse(response, media_type="image/jpeg")  # 直接回傳圖片
-
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=400)
+        return JSONResponse(content={"error": str(e)}, status_code=400)   
 
 @app.post("/Process/")
 async def Process(image1: UploadFile = File(...), image2: UploadFile = File(...)):

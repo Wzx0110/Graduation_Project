@@ -10,9 +10,8 @@ from alignment import align_images, crop_images
 from description import initialize_image_description_model, generate_image_description
 from prompting import generate_transition_prompts
 from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
-from sub2 import create_video2_file
 from subtitle_generate import generate_subtitle
-from sub_audio import create_video_with_subtitles
+from video_generate import create_video_with_subtitles
 
 INPUT_IMG1_PATH = "1.png"
 INPUT_IMG2_PATH = "2.png"
@@ -164,9 +163,9 @@ async def transtion(oldImage: Image.Image, newImage: Image.Image):
     print(f"提示詞生成，耗時 {prompt_end_time - prompt_start_time:.2f} 秒。")
 
     subtitle_start_time = time.time()
+    descriptions = [entry['description'] for entry in transition_steps_list]
     subtitle_list = generate_subtitle(
-        text1=desc1,
-        text2=desc2,
+        descriptions  # 使用生成的描述
     )
     subtitle_end_time = time.time()
 
@@ -222,7 +221,7 @@ async def transtion(oldImage: Image.Image, newImage: Image.Image):
     print(f"內插後共得到 {len(final_frames_pil)} 個最終影格。")
     # create_video2_file(final_frames_pil, 20, subtitle_list)
     
-    video_audio_path = await create_video_with_subtitles(final_frames_pil, subtitles=subtitle_list, fps=20)
+    video_audio_path = await create_video_with_subtitles(final_frames_pil, subtitles=subtitle_list)
     
     main_end_time = time.time()
     print(f"總執行時間: {main_end_time - main_start_time:.2f} 秒。")

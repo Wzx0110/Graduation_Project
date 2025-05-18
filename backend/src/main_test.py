@@ -4,12 +4,15 @@ import numpy as np
 from PIL import Image
 import gc
 import torch
+import asyncio
 
 from alignment import align_images, crop_images
 from description import initialize_image_description_model, generate_image_description
 from prompting import generate_transition_prompts
 from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
-from backend.src.sub_audio import create_sub_video_file
+from subtitle_generate import generate_subtitle
+from video_generate import create_video_with_subtitles
+
 INPUT_IMG1_PATH = "1.png"
 INPUT_IMG2_PATH = "2.png"
 
@@ -161,6 +164,19 @@ if __name__ == "__main__":
     print("生成的步驟:", transition_steps_list)
     print(f"提示詞生成，耗時 {prompt_end_time - prompt_start_time:.2f} 秒。")
 
+    subtitle_start_time = time.time()
+    descriptions = [entry['description'] for entry in transition_steps_list]
+    subtitle_list = generate_subtitle(
+        descriptions  # 使用生成的描述
+    )
+    subtitle_end_time = time.time()
+
+    if not subtitle_list:
+        print("生成字幕失敗")
+        exit()
+    print(f"成功生成字幕: {subtitle_list}")
+    print(f"字幕生成，耗時 {subtitle_end_time - subtitle_start_time:.2f} 秒。")
+
     # 生成關鍵影格圖片
     gen_start_time = time.time()
     try:
@@ -205,6 +221,9 @@ if __name__ == "__main__":
         num_interpolations=NUM_INTERPOLATION_FRAMES
     )
     print(f"內插後共得到 {len(final_frames_pil)} 個最終影格。")
-    create_video_file(final_frames_pil, 20, transition_steps_list)
+    # create_video2_file(final_frames_pil, 20, subtitle_list)
+    
+    asyncio.run(create_video_with_subtitles(final_frames_pil, subtitle_list))
+    
     main_end_time = time.time()
     print(f"總執行時間: {main_end_time - main_start_time:.2f} 秒。")
