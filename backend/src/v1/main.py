@@ -5,7 +5,7 @@ from PIL import Image
 import gc
 import torch
 
-from alignment import align_images, crop_images
+from alignment import align_images, crop_images,shrink
 from description import initialize_image_description_model, generate_image_description
 from prompting import generate_transition_prompts
 from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     align_start_time = time.time()
     aligned_img1_np, ref_img2_np = align_images(img1_bytes, img2_bytes)
     align_end_time = time.time()
-
+    
     if aligned_img1_np is None or ref_img2_np is None:
         print("影像對齊失敗")
         exit()
@@ -109,7 +109,8 @@ if __name__ == "__main__":
     cropped_aligned_np, cropped_ref_np = crop_images(
         aligned_img1_np, ref_img2_np)
     crop_end_time = time.time()
-
+    cropped_aligned_np = shrink(cropped_aligned_np)
+    cropped_ref_np = shrink(cropped_ref_np)
     if cropped_aligned_np is None or cropped_ref_np is None:
         print("裁剪圖片失敗")
         exit()

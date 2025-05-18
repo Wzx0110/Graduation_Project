@@ -178,37 +178,62 @@ def crop_images(img1_aligned: np.ndarray, img2_ref: np.ndarray):
             - (裁剪後的 aligned 圖片, 裁剪後的 ref 圖片)
     """
 
-    # 找到非黑色像素區域
-    gray_aligned = cv2.cvtColor(img1_aligned, cv2.COLOR_BGR2GRAY)
-    _, mask = cv2.threshold(gray_aligned, 0, 255, cv2.THRESH_BINARY)
+    def get_non_black_mask(img):
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        _, mask = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+        return mask
 
-    cv2.imwrite(os.path.join(OUTPUT_DIR, "crop_mask.png"), mask)
+    # 產生非黑色遮罩
+    mask1 = get_non_black_mask(img1_aligned)
+    mask2 = get_non_black_mask(img2_ref)
 
-    # mask 中最大的輪廓
-    contours, _ = cv2.findContours(
-        mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    # 取兩張圖的非黑區域交集
+    intersection_mask = cv2.bitwise_and(mask1, mask2)
 
-    # 尋找面積最大的輪廓
+    # 儲存遮罩供檢查
+    cv2.imwrite(os.path.join(OUTPUT_DIR, "crop_mask_intersection.png"), intersection_mask)
+
+    # 找到交集區域中最大的輪廓
+    contours, _ = cv2.findContours(intersection_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if not contours:
+        print("找不到有效的裁剪區域（兩圖交集為空）。")
+        return None, None
+
+    # 找最大輪廓範圍
     largest_contour = max(contours, key=cv2.contourArea)
-
     x, y, w, h = cv2.boundingRect(largest_contour)
-    print(f"找到的有效裁剪區域: x={x}, y={y}, w={w}, h={h}")
+    print(f"交集裁剪區域: x={x}, y={y}, w={w}, h={h}")
 
-    # 檢查邊界框是否有效 (寬度和高度必須大於 0)
     if w <= 0 or h <= 0:
         print(f"邊界框無效 (寬={w}, 高={h})，無法進行裁剪。")
         return None, None
 
-    # 裁剪兩張圖片
+    # 同步裁剪兩張圖
     cropped_aligned = img1_aligned[y:y+h, x:x+w]
-    # 確保裁剪區域不超出參考圖像的邊界
-    ref_h, ref_w = img2_ref.shape[:2]
-    crop_y_end = min(y + h, ref_h)
-    crop_x_end = min(x + w, ref_w)
-    cropped_ref = img2_ref[y:crop_y_end, x:crop_x_end]
+    cropped_ref = img2_ref[y:y+h, x:x+w]
 
-    print(f"圖像尺寸: {cropped_aligned.shape}")
+    print(f"裁剪後圖像尺寸: {cropped_aligned.shape}")
     return cropped_aligned, cropped_ref
+def shrink(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # 二值化：將非黑的地方視為內容
+    _, thresh = cv2.threshold(gray, 10, 255, cv2.THRESH_BINARY)
+
+    # 找出非黑像素的最小邊界
+    coords = cv2.findNonZero(thresh)
+    x, y, w, h = cv2.boundingRect(coords)
+
+    # 多裁一點邊界（往內縮）
+    shrink = 20  # 可調整：裁掉更多請設更大
+    x_new = min(x + shrink, img.shape[1] - 1)
+    y_new = min(y + shrink, img.shape[0] - 1)
+    w_new = max(w - 2 * shrink, 1)
+    h_new = max(h - 2 * shrink, 1)
+
+    # 裁剪圖片
+    cropped = img[y_new:y_new + h_new, x_new:x_new + w_new]
+    return cropped
 
 
 # 測試
