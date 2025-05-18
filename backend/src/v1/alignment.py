@@ -248,7 +248,7 @@ def shrink(image):
         y.append(points[i][1])
     x = sorted(x)
     y = sorted(y)
-    return image[y[1]:y[3], x[1]:x[3]]  # 裁剪區域
+    return image[y[1]:y[2], x[1]:x[2]]  # 裁剪區域
 
 
 
