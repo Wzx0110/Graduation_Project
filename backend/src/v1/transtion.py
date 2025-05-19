@@ -6,18 +6,18 @@ import gc
 import torch
 import io
 
-from alignment import align_images, crop_images
-from description import initialize_image_description_model, generate_image_description
-from prompting import generate_transition_prompts
-from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
-from subtitle_generate import generate_subtitle
-from video_generate import create_video_with_subtitles
+from v1.alignment import align_images, crop_images, shrink
+from v1.description import initialize_image_description_model, generate_image_description
+from v1.prompting import generate_transition_prompts
+from v1.generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
+from v1.subtitle_generate import generate_subtitle
+from v1.video_generate import create_video_with_subtitles
 
 INPUT_IMG1_PATH = "../../../assets/test_images/1.png"
 INPUT_IMG2_PATH = "../../../assets/test_images/2.png"
 
 # generation.py 的參數
-GENERATION_TARGET_SIZE = (1024, 1024)  # 生成圖像的目標尺寸，建議符合 SD 模型的原生尺寸
+GENERATION_TARGET_SIZE = (512, 512)  # 生成圖像的目標尺寸，建議符合 SD 模型的原生尺寸
 GENERATION_STRENGTH = 0.3          # Img2Img 強度 (0.0 到 1.0，較低值表示允許更多變化)
 GENERATION_GUIDANCE_SCALE = 12     # CFG 引導比例 (Classifier-Free Guidance)
 GENERATION_NUM_INFERENCE_STEPS = 100  # Stable Diffusion 的去噪步數 (較少步數可加速生成)
@@ -109,6 +109,9 @@ async def transtion(oldImage: Image.Image, newImage: Image.Image):
         aligned_img1_np, ref_img2_np)
     crop_end_time = time.time()
 
+    cropped_aligned_np = shrink(cropped_aligned_np)
+    cropped_ref_np = shrink(cropped_ref_np)
+    # 將裁剪後的圖片轉換為 PIL RGB 格式S
     if cropped_aligned_np is None or cropped_ref_np is None:
         print("裁剪圖片失敗")
         exit()
