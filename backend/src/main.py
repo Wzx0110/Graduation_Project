@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware  # 導入 CORS 中間件
 import io
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
-from v1.transtion import transtion
+from transition import transition
 
 app = FastAPI()
 oringin = [
@@ -40,7 +40,7 @@ async def Process(image1: UploadFile = File(...), image2: UploadFile = File(...)
         oldImage = Image.open(io.BytesIO(image_data1)).convert("RGB")
         newImage = Image.open(io.BytesIO(image_data2)).convert("RGB")
 
-        video_io = await transtion(oldImage, newImage)
+        video_io = await transition(oldImage, newImage)
 
         return StreamingResponse(video_io, media_type="video/mp4", headers={
             "Content-Disposition": "attachment; filename=transition.mp4"
