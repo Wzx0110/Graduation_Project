@@ -162,8 +162,7 @@ def align_images(img1_bytes: bytes, img2_bytes: bytes):
             return None
     except Exception as e:
         print(f"對齊過程中發生錯誤：{e}")
-
-
+        return None
 def crop_images(img1_aligned: np.ndarray, img2_ref: np.ndarray):
     """
     裁剪兩張圖片，去除 img1_aligned 因 warpPerspective 產生的黑色邊框
@@ -210,6 +209,40 @@ def crop_images(img1_aligned: np.ndarray, img2_ref: np.ndarray):
     print(f"圖像尺寸: {cropped_aligned.shape}")
     return cropped_aligned, cropped_ref
 
+def shrink(image):
+    if image is None:
+        return None
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    _, mask = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    #cv2.imwrite("mask.png", mask)
+    # 找輪廓
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        raise ValueError("找不到白色區域")
+
+    # 選最大輪廓（可能就是白底）
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    # 近似成四邊形
+    epsilon = 0.02 * cv2.arcLength(largest_contour, True)
+    approx = cv2.approxPolyDP(largest_contour, epsilon, True)
+
+    if len(approx) != 4:
+        raise ValueError(f"偵測到的角點不是四個，而是 {len(approx)}")
+
+    # 排序四個角點為 top-left, top-right, bottom-right, bottom-left
+    points = approx.reshape(4, 2)
+    #print(f"偵測到的四個角點：{points}")
+    x=[]
+    y=[]
+    for i in range(4):
+        x.append(points[i][0])
+        y.append(points[i][1])
+    x = sorted(x)
+    y = sorted(y)
+    print(f"排序後的 x: {x}")
+    print(f"排序後的 y: {y}")
+    return image[y[1]:y[2], x[1]:x[2]]  # 裁剪區域 
 
 # 測試
 if __name__ == "__main__":
@@ -234,6 +267,7 @@ if __name__ == "__main__":
         img1_bytes,
         img2_bytes
     )
+    
 
     print(f"對齊後圖片的形狀：{aligned_image_np.shape}，類型：{aligned_image_np.dtype}")
     cv2.imwrite(os.path.join(
@@ -242,10 +276,10 @@ if __name__ == "__main__":
     if aligned_image_np is None or ref_image_np is None:
         print("無法進行裁剪。")
     else:
-        cropped_aligned, cropped_ref = crop_images(
-            aligned_image_np, ref_image_np)
+        cropped_aligned, cropped_ref = crop_images(aligned_image_np, ref_image_np)
 
         if cropped_aligned is not None and cropped_ref is not None:
+
             cv2.imwrite(os.path.join(
                 OUTPUT_DIR, "cropped_aligned.png"), cropped_aligned)
             cv2.imwrite(os.path.join(

@@ -6,7 +6,7 @@ import gc
 import torch
 import io
 
-from alignment import align_images, crop_images
+from alignment import align_images, crop_images,shrink
 from description import initialize_image_description_model, generate_image_description
 from prompting import generate_transition_prompts
 from generation import initialize_sd_pipeline, generate_image_sequence, interpolate_frames
@@ -108,7 +108,9 @@ async def transtion(oldImage: Image.Image, newImage: Image.Image):
     cropped_aligned_np, cropped_ref_np = crop_images(
         aligned_img1_np, ref_img2_np)
     crop_end_time = time.time()
-
+    cropped_aligned_np = shrink(cropped_aligned_np)
+    cropped_ref_np = shrink(cropped_ref_np)
+    # 將裁剪後的圖片轉換為 PIL RGB 格式S
     if cropped_aligned_np is None or cropped_ref_np is None:
         print("裁剪圖片失敗")
         exit()
