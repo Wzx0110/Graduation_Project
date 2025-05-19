@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware  # 導入 CORS 中間件
 import io
 from fastapi.responses import JSONResponse
 from fastapi.responses import StreamingResponse
-from v1_test import transtion
+from v1.transtion import transtion
 
 app = FastAPI()
 oringin = [
