@@ -7,7 +7,7 @@ import type { SubstepData } from '../types'; // 從中央類型定義文件導�
 export const SubstepAccordion: React.FC<{ title: string; data: SubstepData }> = ({ title, data }) => {
     const [isOpen, setIsOpen] = useState(false);
 
-    // 升級版下載函數
+    // 下載函數
     const handleDownload = (e: React.MouseEvent) => {
         e.stopPropagation(); // 防止觸發 accordion 的開合
 
@@ -17,7 +17,6 @@ export const SubstepAccordion: React.FC<{ title: string; data: SubstepData }> = 
             imagesToDownload.forEach((base64Image: string, index: number) => {
                 const link = document.createElement('a');
                 link.href = base64Image;
-                // 替換檔名中的非法字符
                 const safeTitle = title.replace(/[\s/\\?%*:|"<>]/g, '_');
                 const fileName = `${safeTitle}_${index + 1}.png`;
                 link.download = fileName;
@@ -36,7 +35,7 @@ export const SubstepAccordion: React.FC<{ title: string; data: SubstepData }> = 
             if (textToDownload.trim().startsWith('{') || textToDownload.trim().startsWith('[')) {
                 try {
                     const jsonObj = JSON.parse(textToDownload);
-                    const jsonString = JSON.stringify(jsonObj, null, 2); // 美化格式
+                    const jsonString = JSON.stringify(jsonObj, null, 2);
                     const blob = new Blob([jsonString], { type: 'application/json;charset=utf-8' });
                     const url = URL.createObjectURL(blob);
                     const link = document.createElement('a');
@@ -67,37 +66,53 @@ export const SubstepAccordion: React.FC<{ title: string; data: SubstepData }> = 
         }
     };
 
+    // 渲染內容的輔助函數
     const renderContent = () => {
+        // 智能處理 previews 陣列
         if (data.previews && Array.isArray(data.previews)) {
-            return (
-                <div className="grid grid-cols-2 gap-2 mt-2">
-                    <img src={data.previews[0]} alt={`${title} preview 1`} className="rounded-md border border-gray-600" />
-                    <img src={data.previews[1]} alt={`${title} preview 2`} className="rounded-md border border-gray-600" />
-                </div>
-            );
+            if (data.previews.length === 1) {
+                // 如果只有一張圖，讓它佔滿寬度
+                return <img src={data.previews[0]} alt={`${title} preview`} className="mt-2 rounded-md border border-gray-600 w-full" />;
+            }
+            if (data.previews.length === 2) {
+                // 如果有兩張圖，左右對比
+                return (
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                        <img src={data.previews[0]} alt={`${title} preview 1`} className="rounded-md border border-gray-600" />
+                        <img src={data.previews[1]} alt={`${title} preview 2`} className="rounded-md border border-gray-600" />
+                    </div>
+                );
+            }
         }
+        // 處理單張大圖 (用於匹配線等)
         if (data.preview_match) {
-            return <img src={data.preview_match} alt={`${title} match preview`} className="mt-2 rounded-md border border-gray-600" />;
+            return <img src={data.preview_match} alt={`${title} match preview`} className="mt-2 rounded-md border border-gray-600 w-full" />;
         }
         return null;
     };
 
     const isDownloadable = data.previews || data.preview_match || data.text || data.full_data;
 
+    // --- JSX 渲染 ---
     return (
-        <div className="bg-gray-700/50 rounded-lg">
+        <div className="rounded-lg" style={{ backgroundColor: 'var(--secondary)', border: '1px solid var(--border)' }}>
             <button
-                className="w-full flex items-center justify-between p-3 text-left hover:bg-gray-600/50 rounded-lg transition-colors"
+                className="w-full flex items-center justify-between p-3 text-left rounded-lg transition-colors hover:bg-gray-700/50"
                 onClick={() => setIsOpen(!isOpen)}
             >
-                <span className="font-medium text-white">{title}</span>
+                <span className="font-medium">{title}</span>
                 {isOpen ? <ChevronUpIcon className="w-5 h-5 text-gray-400" /> : <ChevronDownIcon className="w-5 h-5 text-gray-400" />}
             </button>
+
             {isOpen && (
-                <div className="p-4 border-t border-gray-600">
-                    {data.text && <p className="text-sm text-gray-300 mb-2 whitespace-pre-wrap bg-gray-900/50 p-3 rounded-md font-mono">{data.text}</p>}
-                    {renderContent()}
-                    <div className="mt-3 flex justify-end">
+                <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+                    {data.text && <pre className="text-xs font-mono p-3 rounded-md whitespace-pre-wrap" style={{ backgroundColor: 'var(--background)', color: 'var(--muted-foreground)' }}>{data.text}</pre>}
+
+                    <div className="flex justify-center">
+                        {renderContent()}
+                    </div>
+
+                    <div className="mt-4 flex justify-end">
                         {isDownloadable && (
                             <button
                                 onClick={handleDownload}

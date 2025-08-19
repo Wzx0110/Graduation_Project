@@ -1,15 +1,17 @@
-python
-torch
-transformers
-Pillow
-ollama
 fastapi
 uvicorn[standard]
-python-multipart  # For FastAPI File uploads
-opencv-python
+python-multipart
 numpy
-Pillow
+opencv-contrib-python
+python-dotenv
+aiofiles
+websockets
+ollama  
 transformers
-torch
-diffusers[torch] # Includes accelerate
-ollama
+diffusers
+accelerate  # 推薦，用於加速模型載入和推斷
+scipy       # Slerp 需要用到
+tensorflow>=2.16  # <-- 修改點：要求大於等於 2.16 的任何穩定版本
+tensorflow-hub      # FILM 模型需要這個
+moviepy
+# pip3 install torch torchvision --index-url https://download.pytorch.org/whl/cu126
